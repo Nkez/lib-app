@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	library_app "github.com/Nkez/lib-app.git"
 	"github.com/Nkez/lib-app.git/pkg/handler"
 	"github.com/Nkez/lib-app.git/pkg/repository"
@@ -10,7 +9,6 @@ import (
 	_ "github.com/lib/pq"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
-	"net/smtp"
 	"os"
 )
 
@@ -58,27 +56,4 @@ func ConfigInit() error {
 	viper.AddConfigPath("configs")
 	viper.SetConfigName("config")
 	return viper.ReadInConfig()
-}
-
-func email() {
-
-	from := "libtestgolang@gmail.com"
-	password := "libgo123456"
-
-	to := []string{"kezmikita@gmail.com"}
-
-	host := "smtp.gmail.com"
-	port := "587"
-	address := host + ":" + port
-
-	message := []byte("ЖИНИЦЦЦО БУДЕМ???))))))))))")
-
-	auth := smtp.PlainAuth("", from, password, host)
-
-	err := smtp.SendMail(address, auth, from, to, message)
-	if err != nil {
-		fmt.Println("err:", err)
-		return
-	}
-
 }
