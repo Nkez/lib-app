@@ -1,0 +1,106 @@
+CREATE TABLE books
+(
+    id serial not null unique primary key,
+    book_name varchar(255) not null,
+    cost decimal not null,
+    cover varchar(255) not null,
+    published int not null,
+    pages integer not null,
+    amount integer not null
+);
+
+CREATE TABLE authors
+(
+    id serial not null unique primary key,
+    author_name varchar(255) not null unique,
+    author_foto varchar(255)
+);
+Mkez — Сегодня, в 23:23
+так я тогда еще больше запутался)
+а с картинками связь один ко многим ?
+Sergey Baraulia — Сегодня, в 23:23
+CREATE TABLE book_author
+(
+    book_id int references books(id) on delete cascade,
+    author_id int references authors(id) on delete cascade,
+    PRIMARY KEY(book_id, author_id)
+);
+
+
+
+CREATE TABLE books
+(
+    id                SERIAL PRIMARY KEY,
+    book_title        VARCHAR(50)   NOT NULL,
+    book_title_native VARCHAR(50),
+    genre             VARCHAR(20)   NOT NULL,
+    book_price        DECIMAL(6, 2) NOT NULL,
+    inventory_count   INT NOT NULL,
+    one_day_price DECIMAL(6,2) NOT NULL,
+    year_of_published DATE,
+    registration_date DATE,
+    number_of_pages INT NOT NULL,
+    book_state BOOLEAN NOT NULL ,
+    hide_book BOOLEAN,
+    rating INT
+);
+
+CREATE TABLE authors
+(
+    authors_id		SERIAL PRIMARY KEY,
+    authors_firstname		varchar(40) NOT NULL,
+    authors_lastname		varchar(40) NOT NULL,
+    book_id int,
+    FOREIGN KEY (authors_id) REFERENCES books(id)
+);
+
+
+
+CREATE TABLE images (
+    images_id int,
+    book_text text,
+    book_images bytea,
+    FOREIGN KEY (images_id) REFERENCES books(id)
+);
+
+CREATE TABLE users
+(
+    id              SERIAL PRIMARY KEY NOT NULL ,
+    last_name       VARCHAR(40) NOT NULL,
+    first_name      VARCHAR(40) NOT NULL,
+    middle_name     VARCHAR(40),
+    passport_number VARCHAR(30) UNIQUE ,
+    birthday        DATE NOT NULL,
+    email_address   VARCHAR(40) UNIQUE NOT NULL,
+    address         VARCHAR(50)
+);
+
+
+CREATE  TABLE order_cart
+(
+    last_name VARCHAR(40) NOT NULL,
+    first_name VARCHAR(40) NOT NULL,
+    email_address VARCHAR(40) UNIQUE NOT NULL,
+    book1 VARCHAR(40),
+    book2 VARCHAR(40),
+    book3 VARCHAR(40),
+    book4 VARCHAR(40),
+    book5 VARCHAR(40),
+    price DECIMAL (6,2),
+    date_to_return DATE DEFAULT CURRENT_DATE,
+    rating INT
+);
+WITH bookins AS (
+
+,
+				authins AS (
+				INSERT INTO authors(authors_firstname,authors_lastname,authors_foto)
+				VALUES ($13,$14,$15)),
+				//genre AS(
+				//INSERT INTO genres(genre) VALUES ($16))
+				,
+                				authins AS (
+                				INSERT INTO authors(authors_firstname,authors_lastname,authors_foto)
+                				VALUES ($13,$14,$15)),
+                				genre AS(
+                				INSERT INTO genres(genre) VALUES ($16))

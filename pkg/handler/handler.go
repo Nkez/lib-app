@@ -1,37 +1,34 @@
 package handler
 
 import (
-	"fmt"
+	"github.com/Nkez/lib-app.git/pkg/services"
 	"github.com/gorilla/mux"
-	log "github.com/sirupsen/logrus"
-	"html"
 	"net/http"
 )
 
 type Handler struct {
+	service *services.Service
+}
+
+func NewHandler(service *services.Service) *Handler {
+	return &Handler{service: service}
 }
 
 func (h *Handler) InitRouter() *mux.Router {
 	r := mux.NewRouter()
-	r.HandleFunc("/books", GetAllBooks).Methods("GET")
-	r.HandleFunc("/users", GetAllUsers).Methods("GET")
-	r.HandleFunc("/create/book", CreateBook).Methods("POST")
-	r.HandleFunc("/create/user", CreateUser).Methods("POST")
+	http.Handle("/", r)
+	r.HandleFunc("/book", h.GetAllBooks).Methods("GET")
+	r.HandleFunc("/book/create", h.CreateBook).Methods("POST")
+
+	r.HandleFunc("/user", h.GetAllUsers).Methods("GET")
+	r.HandleFunc("/find", h.FindRegisterUser).Methods("GET")
+	r.HandleFunc("/user/create", h.CreateUser).Methods("POST")
+
+	r.HandleFunc("/cart/create", h.CreateCard).Methods("GET")
+
+	//r.HandleFunc("/return", h.ReturnBook).Methods("DELETE")
+	//r.HandleFunc("/writeoff", h.WriteOffBook).Methods("DELETE")
+	//r.HandleFunc("/profitability", h.LibraryProfitabilaty).Methods("GET")
+
 	return r
-}
-
-func CreateUser(w http.ResponseWriter, r *http.Request) {
-	log.Info("create user")
-}
-
-func CreateBook(w http.ResponseWriter, r *http.Request) {
-	log.Info("create book")
-}
-
-func GetAllBooks(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "GetAllBooks, %q", html.EscapeString(r.URL.Path))
-}
-
-func GetAllUsers(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "GetAllBooks, %q", html.EscapeString(r.URL.Path))
 }
