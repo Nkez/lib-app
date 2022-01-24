@@ -2,7 +2,7 @@ package handler
 
 import (
 	"encoding/json"
-	library_app "github.com/Nkez/lib-app.git"
+	library_app "github.com/Nkez/lib-app.git/models"
 	"strconv"
 
 	"github.com/sirupsen/logrus"
@@ -30,23 +30,6 @@ func (h *Handler) CreateUser(w http.ResponseWriter, r *http.Request) {
 
 	header := w.Header()
 	header.Add("id", strconv.Itoa(userId))
-	//var input library_app.User
-	//decoder := json.NewDecoder(r.Body)
-	//
-	//if err := decoder.Decode(&input); err != nil {
-	//
-	//	http.Error(w, err.Error(), 400)
-	//	return
-	//}
-	//
-	//userId, err := h.service.User.CreateUser(input)
-	//if err != nil{
-	//	http.Error(w, err.Error(), http.StatusBadRequest)
-	//	return
-	//}
-	//
-	//header := w.Header()
-	//header.Add("id", strconv.Itoa(userId))
 }
 
 func (h Handler) GetAllUsers(w http.ResponseWriter, r *http.Request) {
@@ -74,3 +57,5 @@ func (h Handler) GetAllUsers(w http.ResponseWriter, r *http.Request) {
 	}
 
 }
+
+

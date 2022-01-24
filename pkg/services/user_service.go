@@ -1,7 +1,7 @@
 package services
 
 import (
-	library_app "github.com/Nkez/lib-app.git"
+	library_app "github.com/Nkez/lib-app.git/models"
 	"github.com/Nkez/lib-app.git/pkg/repository"
 	"github.com/sirupsen/logrus"
 	"time"
