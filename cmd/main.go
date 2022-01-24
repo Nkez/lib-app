@@ -1,10 +1,10 @@
 package main
 
 import (
-	library_app "github.com/Nkez/lib-app.git"
-	"github.com/Nkez/lib-app.git/pkg/handler"
-	"github.com/Nkez/lib-app.git/pkg/repository"
-	services "github.com/Nkez/lib-app.git/pkg/services"
+	library_app "github.com/Nkez/library-app.git"
+	"github.com/Nkez/library-app.git/pkg/handler"
+	"github.com/Nkez/library-app.git/pkg/repository"
+	services "github.com/Nkez/library-app.git/pkg/services"
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 	"github.com/sirupsen/logrus"
@@ -38,7 +38,8 @@ func main() {
 	services := services.NewService(repos)
 	handlers := handler.NewHandler(services)
 
-	go services.SendEmail()
+	//services.FirstCheck()
+	//go services.WaitAndEmailAgain()
 
 	if err := ConfigInit(); err != nil {
 		logrus.Fatalf("error init config %s", err.Error())

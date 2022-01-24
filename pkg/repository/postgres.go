@@ -6,9 +6,20 @@ import (
 )
 
 const (
-	userTable = "users"
-	bookTable = "books"
-	cartTable = "order_cart"
+	userTable                = "users"
+	bookTable                = "books"
+	bookCopiesTable          = "book_copies"
+	bookBookCopiesTable      = "books_book_copies"
+	bookPhotoTable           = "books_photo"
+	bookBookPhotoTable       = "books_books_photo"
+	authorsTable             = "authors"
+	bookAuthorsTable         = "books_authors"
+	authorsPhotoTable        = "authors_photo"
+	authorsAuthorsPhotoTable = "authors_author_photo"
+	genreTable               = "genres"
+	bookGenreTable           = "book_genre"
+	bookUserTable            = "books_users"
+	limit                    = 40
 )
 
 type Config struct {

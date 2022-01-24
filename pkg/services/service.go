@@ -1,54 +1,79 @@
 package services
 
 import (
-	library_app "github.com/Nkez/lib-app.git"
-	"github.com/Nkez/lib-app.git/pkg/repository"
+	"github.com/Nkez/library-app.git/models"
+	"github.com/Nkez/library-app.git/pkg/repository"
 )
 
-type Cart interface {
-	CreateCart(email string, books []string) (library_app.OrderCart, error)
-	CheckBooks(book string) (checkBook string, err error)
-	GetPrice(book string) (priceBook float64, err error)
-	GetUser(email string) (library_app.OrderCart, error)
-	CheckOrderBook(email string) (orderBook []string, err error)
-	FindRegisterUser(email string) (library_app.User, error)
-
-	GetEmailToSend() ([]library_app.OrderCart, []string, error)
-	UpdatePrice() error
-	SendEmail()
-}
-
 type Book interface {
-	CreateBook(book library_app.Book) (int, error)
+	CreateBook(book models.Book) (int, error)
+	CreateGenre(genres models.CreateGenre) (id int, err error)
+	CreateAuthor(authors models.CreateAuthor) (id int, err error)
+	JoinBookPhoto(idBook int, p, n []string) error
+	GetAllBooks(page, limit string) ([]models.ReturnBook, error)
+	GetAllGenres() ([]string, error)
+	GetByTitle(title string) ([]models.ReturnBook, error)
+	GetByWord(word string) ([]string, error)
+
+	GetAutPhoto(id int) (path, photo string, err error)
+
+	GetAutInfo(id int) (models.CreateAuthor, error)
+	ChangeAutPhoto(author models.CreateAuthor)
+	ChangeBookPhoto(newPath, newName, paths string)
+
+	BookPhoto(idPhoto int) (path, name string, err error)
+	GetByTopRating() []models.TopRating
+	JoinDefetBookPhoto(idBook int, defect string, paths []string) error
+	GetDefectPhoto(idPhoto int) (string, error)
+	ChangeAuthorPhoto(id int, paths string) error
+
+	DeleteGenre(id int) error
+	//ChekRegisterUser(email string) (models.User, error)
 }
 
 type User interface {
-	CreateUser(user library_app.User) (int, error)
-	GetAllUsers() ([]library_app.User, error)
+	CreateUser(user models.User) (int, error)
+	GetAllUsers(page, limit string) ([]models.User, error)
+	GetByName(name string) []models.UserName
+	FindByWord(name string) []models.UserName
 }
 
-type ReturnBook interface {
-	GetAllBooks() ([]library_app.ReturnBook, error)
+type Order interface {
+	CreateOrder(input models.OrderInput) (models.Order, error)
+	GetAllOrder(page, limit string) ([]models.InfoOrdDept, error)
 }
 
-type ReturnCart interface {
-	CreateRtCart() error
+type Return interface {
+	ReturnCart(input models.ReturnInput) (models.DbrInfo, error)
+}
+type Debors interface {
+	GetAllDebors() ([]models.InfoOrdDept, error)
+	FirstCheck()
+	WaitAndEmailAgain()
+}
+
+type Repository struct {
+	Book
+	User
+	Order
+	Return
+	Debors
 }
 
 type Service struct {
 	Book
 	User
-	Cart
-	ReturnBook
-	ReturnCart
+	Order
+	Return
+	Debors
 }
 
 func NewService(repository *repository.Repository) *Service {
 	return &Service{
-		User:       NewUserService(repository.User),
-		Book:       NewBookService(repository.Book),
-		Cart:       NewCartService(repository.Cart),
-		ReturnBook: NewReturnBookService(repository.ReturnBook),
-		ReturnCart: NewReturnCartService(repository.ReturnCart),
+		User:   NewUserService(repository.User),
+		Book:   NewBookService(repository.Book),
+		Order:  NewOrderService(repository.Order),
+		Return: NewReturnService(repository.Return),
+		Debors: NewDeborsService(repository.Debors),
 	}
 }

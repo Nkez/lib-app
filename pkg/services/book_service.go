@@ -2,10 +2,10 @@ package services
 
 import (
 	"fmt"
-	"github.com/Nkez/lib-app.git/models"
-	"github.com/Nkez/lib-app.git/pkg/repository"
+	"github.com/Nkez/library-app.git/models"
+	"github.com/Nkez/library-app.git/pkg/repository"
+	"github.com/asaskevich/govalidator"
 	"github.com/sirupsen/logrus"
-	"strings"
 	"time"
 )
 
@@ -17,39 +17,59 @@ func NewBookService(repositoryBook repository.Book) *BookService {
 	return &BookService{repositoryBook: repositoryBook}
 }
 
+///Book
+
 func (s *BookService) CreateBook(book models.Book) (int, error) {
-	logrus.Info("Start  Create Book service.................")
-	logrus.Info("Insert Book Info..............")
+	logrus.Info("Start  Create Book service")
+	logrus.Info("Insert Book Info")
+	res, err := govalidator.ValidateStruct(book)
+	if err != nil {
+		println("error: " + err.Error())
+	}
+	if res == false {
+		return 0, err
+	}
 	id, err := s.InsertBookInfo(book)
 	if err != nil {
 		return 0, err
 	}
-	logrus.Info("Insert BookFoto................")
-	_, err = s.InertBookFoto(book)
-	if err != nil {
-		return 0, err
-	}
-	logrus.Info("Join Book-BookFoto................")
-	s.JoinBookBookFoto(book)
+	logrus.Info("Join book and genres")
+	s.JoinBookGenres(id, book)
+	logrus.Info("Join book and author")
+	s.JoinBookAuthor(id, book)
 
-	logrus.Info("Insert Authors................")
-	_, err = s.InsertAuthorInfo(book)
-	if err != nil {
-		return 0, err
-	}
-	logrus.Info("Join Book-Authors................")
-	s.JoinBookAuthors(book)
-	if err != nil {
-		return 0, err
-	}
-	logrus.Info("Join Book-Genre................")
-	err = s.JoinBookGenre(book)
-	if err != nil {
-		return 0, err
-	}
 	return id, nil
 }
+func (s *BookService) GetAllBooks(page, limit string) ([]models.ReturnBook, error) {
+	logrus.Info("Find All Books service")
+	return s.repositoryBook.GetAllBooks(page, limit)
 
+}
+func (s *BookService) JoinBookPhoto(idBook int, p, n []string) error {
+	return s.repositoryBook.JoinBookPhoto(idBook, p, n)
+}
+func (s *BookService) JoinDefetBookPhoto(idBook int, defect string, paths []string) error {
+	return s.repositoryBook.JoinDefetBookPhoto(idBook, defect, paths)
+}
+
+func (s *BookService) BookPhoto(idPhoto int) (path, name string, err error) {
+	path, name, err = s.repositoryBook.BookPhoto(idPhoto)
+	if err != nil {
+		return "", "", err
+	}
+	return path, name, nil
+}
+
+func (s *BookService) ChangeBookPhoto(newPath, newName, paths string) {
+	s.repositoryBook.ChangeBookPhoto(newPath, newName, paths)
+}
+func (s *BookService) GetDefectPhoto(idPhoto int) (string, error) {
+	path, err := s.repositoryBook.GetDefectPhoto(idPhoto)
+	if err != nil {
+		return "", err
+	}
+	return path, nil
+}
 func (s *BookService) InsertBookInfo(book models.Book) (int, error) {
 	logrus.Info("parse  date")
 	yearPub, err := time.Parse("2006-01-02", book.YearOfPublished)
@@ -63,105 +83,62 @@ func (s *BookService) InsertBookInfo(book models.Book) (int, error) {
 	}
 	id, err := s.repositoryBook.InsertBookInfo(yearPub, regDate, book)
 	if err != nil {
-		return 0, err /*fmt.Errorf("error in book info")*/
+		return 0, err
 	}
+
 	return id, nil
 }
 
-func (s *BookService) InertBookFoto(book models.Book) ([]int, error) {
-	var idSlice []int
-	var id int
-	fmt.Println(book.BooksPhoto)
-	for i := 0; i < len(book.BooksPhoto); i++ {
-		book.BooksPhoto[i].BookPhoto = strings.Trim(book.BooksPhoto[i].BookPhoto, "[{ }}")
-		id, _ = s.repositoryBook.InertBookFoto(i, book)
-		idSlice = append(idSlice, id)
+///Author
+func (s *BookService) GetAutPhoto(id int) (path, photo string, err error) {
+	path, photo, err = s.repositoryBook.GetAutPhoto(id)
+	if err != nil {
+		return "", "", err
 	}
-	return idSlice, nil
+	return path, photo, nil
+}
+func (s *BookService) CreateAuthor(authors models.CreateAuthor) (id int, err error) {
+	return s.repositoryBook.InsertAuthorInfo(authors)
+}
+func (s *BookService) JoinBookAuthor(id int, book models.Book) error {
+	return s.repositoryBook.JoinBookAuthor(id, book)
+}
+func (s *BookService) ChangeAuthorPhoto(id int, paths string) error {
+	return s.repositoryBook.ChangeAuthorPhoto(id, paths)
 }
 
-func (s *BookService) JoinBookBookFoto(book models.Book) {
-	idBook, _ := s.InsertBookInfo(book)
-	idFotos, _ := s.InertBookFoto(book)
-	fmt.Println(idBook)
-	fmt.Println(idFotos)
-	for i := 0; i < len(idFotos); i++ {
-		s.repositoryBook.JoinBookBookFoto(idBook, idFotos[i])
-	}
+func (s *BookService) GetAutInfo(id int) (models.CreateAuthor, error) {
+	return s.repositoryBook.GetAutInfo(id)
 }
 
-func (s *BookService) InsertAuthorInfo(book models.Book) ([]int, error) {
-	fmt.Println(book.Authors)
-	var id int
-	var idSlice []int
-	for i := 0; i < len(book.Authors); i++ {
-		id, _ = s.repositoryBook.InsertAuthorInfo(i, book)
-		idSlice = append(idSlice, id)
-	}
-	fmt.Println(idSlice)
-	return idSlice, nil
+func (s *BookService) ChangeAutPhoto(author models.CreateAuthor) {
+	s.repositoryBook.ChangeAutPhoto(author)
 }
 
-func (s *BookService) JoinBookAuthors(book models.Book) {
-	idBook, _ := s.InsertBookInfo(book)
-	idAuthors, _ := s.InsertAuthorInfo(book)
-	for i := 0; i < len(idAuthors); i++ {
-		s.repositoryBook.JoinBookAuthors(idBook, idAuthors[i])
-	}
+//Genre
+
+func (s *BookService) GetAllGenres() ([]string, error) {
+	logrus.Info("Find genre serive")
+	return s.repositoryBook.GetAllGenres()
 }
-
-func (s *BookService) JoinBookGenre(book models.Book) error {
-	idBook, _ := s.InsertBookInfo(book)
-	var idGenres []int
-	for i := 0; i < len(book.Genres); i++ {
-		id, err := s.ParseAndCheckGenre(i, book)
-		if err != nil {
-			return err
-		}
-		idGenres = append(idGenres, id)
-	}
-
-	for i := 0; i < len(idGenres); i++ {
-		s.repositoryBook.JoinBookGenre(idBook, idGenres[i])
-	}
+func (s *BookService) CreateGenre(genres models.CreateGenre) (id int, err error) {
+	return s.repositoryBook.InsertGenre(genres)
+}
+func (s *BookService) JoinBookGenres(id int, book models.Book) error {
+	s.repositoryBook.JoinBookGenres(id, book)
 	return nil
 }
-
-func (s *BookService) ParseAndCheckGenre(index int, book models.Book) (id int, err error) {
-	logrus.Info("parse genres................")
-	book.Genres[index].Genre = strings.ToLower(strings.Trim(book.Genres[index].Genre, "{ }"))
-	switch book.Genres[index].Genre {
-	case "fantasy":
-		return 1, nil
-	case "adventure":
-		return 2, nil
-	case "romance":
-		return 3, nil
-	case "contemporary":
-		return 4, nil
-	case "dystopian":
-		return 5, nil
-	case "mystery":
-		return 6, nil
-	case "horror":
-		return 7, nil
-	case "thriller":
-		return 8, nil
-	case "paranormal":
-		return 9, nil
-	default:
-		return 0, fmt.Errorf("choose a genre from the list")
-	}
+func (s *BookService) DeleteGenre(id int) error {
+	return s.repositoryBook.DeleteGenre(id)
 }
 
-func (s *BookService) GetAllBooks() ([]models.ReturnBook, error) {
-	logrus.Info("Find All Books service")
-	return s.repositoryBook.GetAllBooks()
-
+//Find smt..
+func (s *BookService) GetByWord(word string) ([]string, error) {
+	return s.repositoryBook.GetByWord(word)
 }
-
-func (s *BookService) ChekRegisterUser(email string) (models.User, error) {
-
-	return s.repositoryBook.ChekRegisterUser(email)
+func (s *BookService) GetByTitle(title string) ([]models.ReturnBook, error) {
+	return s.repositoryBook.GetByTitle(title)
 }
-
+func (s *BookService) GetByTopRating() []models.TopRating {
+	return s.repositoryBook.GetByTopRating()
+}
