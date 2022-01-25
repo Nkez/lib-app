@@ -21,57 +21,70 @@ func NewOrderService(repositoryOrder repository.Order) *OrderService {
 	return &OrderService{repositoryOrder: repositoryOrder}
 }
 
-func (s *OrderService) CreateOrder(input models.OrderInput) (models.Order, error) {
-	logrus.Info("Creating Order")
-	var order models.Order
+func (s *OrderService) CreateOrder(input models.OrderInput) (models.ReturnOrder, error) {
+	logrus.Info("creating order")
+	var order models.ReturnOrder
+	logrus.Info("validate struct")
 	res, err := govalidator.ValidateStruct(input)
 	if res == false {
 		return order, err
 	}
-	logrus.Info("Check input params")
+
+	logrus.Info("check input params")
 	email, books, err := s.CheckInputParams(input)
 	if err != nil {
 		return order, errors.New("check input params or u take more than 5 books(can only 5)")
 	}
+
+	logrus.Info(fmt.Sprintf("find reg user, email: %s", email))
 	user, err := s.FindUser(email)
 	if err != nil {
 		return order, errors.New(fmt.Sprintf("can not find user check email %s or create new", email))
 	}
-	logrus.Info("Check similar book")
+
+	logrus.Info(fmt.Sprintf("check similar book, %s", books))
 	if err = s.CheckSimilaBook(books); err != nil {
 		return order, err
 	}
 
-	logrus.Info("Check is return")
-	_, err = s.CheckIsReturn(user.Id)
-	if err != nil {
-		return order, err
-	}
-	logrus.Info("get books id")
+	logrus.Info(fmt.Sprintf("get books id, %s", books))
 	idBooks, err := s.GetBooksId(books)
 	if err != nil {
 		return order, err
 	}
-	fmt.Println(idBooks)
-	logrus.Info("total price")
+
+	logrus.Info(fmt.Sprintf("check is return user, id: %v", user.Id))
+	_, err = s.CheckIsReturn(user.Id)
+	if err != nil {
+		return order, err
+	}
+
+	logrus.Info(fmt.Sprintf("total price, books id: %v", idBooks))
 	totalPrice, _ := s.GetPrice(idBooks)
 
-	logrus.Info("Get  order and return day")
+	logrus.Info("parse order, return date")
 	orderDate, returnDate := s.Date()
-
+	logrus.Info(fmt.Sprintf("join copies and book, id :%v", idBooks))
+	_, err = s.JoinBookCopies(idBooks)
+	if err != nil {
+		return order, err
+	}
+	logrus.Info(fmt.Sprintf("join books id:%v", idBooks))
 	if err = s.JoinBookUser(user.Id, idBooks, totalPrice, orderDate, returnDate); err != nil {
 		return order, fmt.Errorf("problem Join book user")
 	}
-	fmt.Println(idBooks)
-	logrus.Info("Minus inventory count")
-
+	logrus.Info("minus inventory count")
 	if err = s.MinusInventoryCount(idBooks); err != nil {
 		return order, err
 	}
 	logrus.Info("Return order cart")
-	order, _ = s.ReturnOrder(user.Id)
+	order, err = s.ReturnOrder(user.Id)
 
 	return order, err
+}
+
+func (s *OrderService) JoinBookCopies(idBook []int) (idCopies []int, err error) {
+	return s.repositoryOrder.JoinBookCopies(idBook)
 }
 
 func (s *OrderService) GetBooksId(books []string) (id []int, err error) {
@@ -158,14 +171,10 @@ func (s *OrderService) MinusInventoryCount(idBooks []int) error {
 	return s.repositoryOrder.MinusInventoryCount(idBooks)
 }
 
-func (s *OrderService) ReturnOrder(id int) (models.Order, error) {
-	logrus.Info("Find All Books service")
-	books, order, _ := s.repositoryOrder.ReturnOrder(id)
-	order.Books = strings.Join(books, ", ")
-
-	return order, nil
+func (s *OrderService) ReturnOrder(id int) (models.ReturnOrder, error) {
+	return s.repositoryOrder.ReturnOrder(id)
 }
 
-func (s *OrderService) GetAllOrder(page, limit string) ([]models.InfoOrdDept, error) {
+func (s *OrderService) GetAllOrder(page, limit string) ([]models.ReturnOrder, error) {
 	return s.repositoryOrder.GetAllOrder(page, limit)
 }

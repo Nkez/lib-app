@@ -30,8 +30,9 @@ func NewReturnService(repositoryReturn repository.Return) *ReturnService {
 }
 
 func (s *ReturnService) ReturnCart(input models.ReturnInput) (returnCart models.DbrInfo, err error) {
-	logrus.Info("Start  return cart service")
-	idUser, idBooks, date, err := s.GetBooksIdAndDate(input)
+	logrus.Info("start return cart")
+	logrus.Info("get book info")
+	idUser, idBooks, orderDate, err := s.GetBooksIdAndDate(input)
 	if err != nil {
 		return returnCart, err
 	}
@@ -45,12 +46,12 @@ func (s *ReturnService) ReturnCart(input models.ReturnInput) (returnCart models.
 		return returnCart, err
 	}
 	logrus.Info("Return Books in Lib")
-	returnCart = s.ReturnBook(idUser, idBooks, date)
+	returnCart = s.ReturnBook(idUser, idBooks, orderDate)
 	logrus.Info("return books")
 	s.ReturnBooksInLibUpdateRating(idBooks, rating)
 	logrus.Info("update price")
 	s.UpdatePrice(idUser, returnCart.Price)
-	fmt.Println(returnCart.Price)
+
 	return returnCart, err
 
 }
@@ -59,12 +60,26 @@ func (s *ReturnService) CheckReturningBook(id int, idBooks []int) error {
 	chekBookId, _ := s.repositoryReturn.CheckReturningBook(id)
 	sort.Ints(chekBookId)
 	sort.Ints(idBooks)
-	fmt.Println(chekBookId)
-	fmt.Println(idBooks)
 	if reflect.DeepEqual(chekBookId, idBooks) == false {
 		return errors.New("u cannot return this book")
 	}
 	return nil
+}
+
+func (s *ReturnService) GetBooksIdAndDate(input models.ReturnInput) (idUser int, idBooks []int, orderDate time.Time, err error) {
+	idUser = input.IdUser
+	fmt.Println(input.ReturnDay)
+	if input.ReturnDay == "" {
+		orderDate = time.Now().UTC()
+	} else {
+		orderDate, _ = time.Parse("2006-01-02", input.ReturnDay)
+	}
+
+	for _, st := range input.ReturnCart {
+		idBooks = append(idBooks, st.IdBook)
+	}
+
+	return idUser, idBooks, orderDate, nil
 }
 
 func (s *ReturnService) UpdatePrice(id int, newPrice float64) {
@@ -91,23 +106,6 @@ func (s *ReturnService) ReturnBook(idUser int, idBook []int, returnDate time.Tim
 
 func (s *ReturnService) ReturnBooksInLibUpdateRating(booksId []int, rating []decimal.Decimal) error {
 	return s.repositoryReturn.ReturnBooksInLibUpdateRating(booksId, rating)
-}
-
-func (s *ReturnService) GetBooksIdAndDate(input models.ReturnInput) (idUser int, idBooks []int, date time.Time, err error) {
-	idUser = input.IdUser
-	fmt.Println(input.ReturnDay)
-	if input.ReturnDay == "" {
-		date = time.Now().UTC()
-	} else {
-		date, _ = time.Parse("2006-01-02", input.ReturnDay)
-	}
-
-	fmt.Println(date)
-	for _, st := range input.ReturnCart {
-		idBooks = append(idBooks, st.IdBook)
-	}
-
-	return idUser, idBooks, date, nil
 }
 
 func (s *ReturnService) GetRating(idBooks []int, input models.ReturnInput) ([]decimal.Decimal, error) {

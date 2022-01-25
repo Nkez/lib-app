@@ -20,8 +20,8 @@ func NewBookService(repositoryBook repository.Book) *BookService {
 ///Book
 
 func (s *BookService) CreateBook(book models.Book) (int, error) {
-	logrus.Info("Start  Create Book service")
-	logrus.Info("Insert Book Info")
+	logrus.Info("create book service")
+	logrus.Info("validate struct book")
 	res, err := govalidator.ValidateStruct(book)
 	if err != nil {
 		println("error: " + err.Error())
@@ -29,29 +29,29 @@ func (s *BookService) CreateBook(book models.Book) (int, error) {
 	if res == false {
 		return 0, err
 	}
+	logrus.Info("insert book info")
 	id, err := s.InsertBookInfo(book)
 	if err != nil {
 		return 0, err
 	}
-	logrus.Info("Join book and genres")
+	logrus.Info(fmt.Sprintf("join book:id %v", id))
 	s.JoinBookGenres(id, book)
-	logrus.Info("Join book and author")
+	logrus.Info(fmt.Sprintf("join book:id %v", id))
 	s.JoinBookAuthor(id, book)
 
 	return id, nil
 }
 func (s *BookService) GetAllBooks(page, limit string) ([]models.ReturnBook, error) {
-	logrus.Info("Find All Books service")
+	logrus.Info("find all book service")
 	return s.repositoryBook.GetAllBooks(page, limit)
-
 }
 func (s *BookService) JoinBookPhoto(idBook int, p, n []string) error {
+	logrus.Info(fmt.Sprintf("join book id %v", idBook))
 	return s.repositoryBook.JoinBookPhoto(idBook, p, n)
 }
 func (s *BookService) JoinDefetBookPhoto(idBook int, defect string, paths []string) error {
 	return s.repositoryBook.JoinDefetBookPhoto(idBook, defect, paths)
 }
-
 func (s *BookService) BookPhoto(idPhoto int) (path, name string, err error) {
 	path, name, err = s.repositoryBook.BookPhoto(idPhoto)
 	if err != nil {
@@ -59,7 +59,6 @@ func (s *BookService) BookPhoto(idPhoto int) (path, name string, err error) {
 	}
 	return path, name, nil
 }
-
 func (s *BookService) ChangeBookPhoto(newPath, newName, paths string) {
 	s.repositoryBook.ChangeBookPhoto(newPath, newName, paths)
 }
@@ -106,11 +105,9 @@ func (s *BookService) JoinBookAuthor(id int, book models.Book) error {
 func (s *BookService) ChangeAuthorPhoto(id int, paths string) error {
 	return s.repositoryBook.ChangeAuthorPhoto(id, paths)
 }
-
 func (s *BookService) GetAutInfo(id int) (models.CreateAuthor, error) {
 	return s.repositoryBook.GetAutInfo(id)
 }
-
 func (s *BookService) ChangeAutPhoto(author models.CreateAuthor) {
 	s.repositoryBook.ChangeAutPhoto(author)
 }
@@ -136,9 +133,23 @@ func (s *BookService) DeleteGenre(id int) error {
 func (s *BookService) GetByWord(word string) ([]string, error) {
 	return s.repositoryBook.GetByWord(word)
 }
-func (s *BookService) GetByTitle(title string) ([]models.ReturnBook, error) {
+func (s *BookService) GetByTitle(title string) (models.ReturnBook, error) {
 	return s.repositoryBook.GetByTitle(title)
 }
 func (s *BookService) GetByTopRating() []models.TopRating {
 	return s.repositoryBook.GetByTopRating()
+}
+func (s *BookService) GetBookById(bookId int) (models.ReturnBook, error) {
+	return s.repositoryBook.GetBookById(bookId)
+
+}
+
+//Copies
+
+func (s *BookService) GetAllCopies(page, limit string) ([]models.CopiesInfo, error) {
+	return s.repositoryBook.GetAllCopies(page, limit)
+}
+
+func (s *BookService) GetCopieByBookIdAndId(bookId, copId string) (models.CopiesSolo, error) {
+	return s.repositoryBook.GetCopieByBookIdAndId(bookId, copId)
 }
