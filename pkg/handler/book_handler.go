@@ -511,12 +511,39 @@ func (h Handler) GetByWord(w http.ResponseWriter, r *http.Request) {
 	}
 
 }
+
+func (h Handler) GetBookById(w http.ResponseWriter, r *http.Request) {
+	logrus.Info("find book by title")
+	v := r.URL.Query()
+	id := v.Get("id")
+	bookId, _ := strconv.Atoi(id)
+	var book models.ReturnBook
+	book, err := h.service.GetBookById(bookId)
+	if err != nil {
+		logrus.WithError(err).Error("error with checking user")
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	output, err := json.Marshal(&book)
+	if err != nil {
+		logrus.WithError(err).Error("error  marshaling register user")
+		w.WriteHeader(http.StatusInternalServerError)
+	}
+	w.Header().Set("Content-Type", "application/json")
+	_, err = w.Write(output)
+	if err != nil {
+		logrus.WithError(err).Error("error  writing output register user")
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+}
 func (h Handler) GetBookByTitle(w http.ResponseWriter, r *http.Request) {
 	logrus.Info("Find book by title")
 
 	v := r.URL.Query()
 	title := v.Get("title")
-	var book []models.ReturnBook
+	var book models.ReturnBook
 	book, err := h.service.GetByTitle(title)
 	if err != nil {
 		logrus.WithError(err).Error("error with checking user")
@@ -565,4 +592,62 @@ func (h Handler) GetALlGenres(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// Delete Photo
+//Copies
+
+func (h Handler) GetAllCopies(w http.ResponseWriter, r *http.Request) {
+	logrus.Info("Find Books handler")
+
+	page := r.URL.Query().Get("page")
+	limit := r.URL.Query().Get("limit")
+	listBooks, err := h.service.GetAllCopies(page, limit)
+	if err != nil {
+		logrus.WithError(err).Error("error with getting books")
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	output, err := json.Marshal(&listBooks)
+	if err != nil {
+		logrus.WithError(err).Error("error marshaling books")
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	_, err = w.Write(output)
+	if err != nil {
+
+		logrus.WithError(err).Error("error writing output")
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+}
+
+func (h Handler) GetCopiesByIdAndBookID(w http.ResponseWriter, r *http.Request) {
+	logrus.Info("Find Books handler")
+
+	copId := r.URL.Query().Get("copid")
+	bookId := r.URL.Query().Get("bookid")
+	listBooks, err := h.service.GetCopieByBookIdAndId(copId, bookId)
+	if err != nil {
+		logrus.WithError(err).Error()
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	output, err := json.Marshal(&listBooks)
+	if err != nil {
+		logrus.WithError(err).Error("error marshaling books")
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	_, err = w.Write(output)
+	if err != nil {
+
+		logrus.WithError(err).Error("error writing output")
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+}

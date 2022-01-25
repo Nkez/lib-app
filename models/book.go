@@ -69,3 +69,31 @@ type BookPhoto struct {
 	PhotoName string
 	Path      string
 }
+
+type RB struct {
+	Id              int
+	BookTitle       string `json:"book_title" db:"book_title"`
+	YearOfPublished string `json:"year_of_published"  db:"year_of_published"`
+	Genres          []struct {
+		Genre string `json:"genre"  db:"genre"`
+	} `json:"genre" db:"genres"`
+	TotalCount     int `json:"books_in_lib" db:"books_in_lib"`
+	InventoryCount int `json:"inventory_count" db:"inventory_count"`
+}
+
+type CopiesInfo struct {
+	CopId       int    `json:"cop_id" db:"cop_id"`
+	BookTitle   string `json:"book_title" db:"book_title"`
+	BookId      int    `json:"book_id" db:"book_id"`
+	Defect      string `json:"defect" db:"defect"`
+	DefectPhoto string `json:"defect_photo" db:"defect_photo"`
+	HideBook    string `json:"hide_book" db:"hide_book"`
+}
+
+type CopiesSolo struct {
+	CopId       int    `json:"cop_id" db:"cop_id"`
+	BookId      int    `json:"book_id" db:"book_id"`
+	Defect      string `json:"defect" db:"defect"`
+	DefectPhoto string `json:"defect_photo" db:"defect_photo"`
+	HideBook    string `json:"hide_book" db:"hide_book"`
+}

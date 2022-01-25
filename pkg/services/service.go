@@ -12,7 +12,7 @@ type Book interface {
 	JoinBookPhoto(idBook int, p, n []string) error
 	GetAllBooks(page, limit string) ([]models.ReturnBook, error)
 	GetAllGenres() ([]string, error)
-	GetByTitle(title string) ([]models.ReturnBook, error)
+	GetByTitle(title string) (models.ReturnBook, error)
 	GetByWord(word string) ([]string, error)
 
 	GetAutPhoto(id int) (path, photo string, err error)
@@ -28,6 +28,11 @@ type Book interface {
 	ChangeAuthorPhoto(id int, paths string) error
 
 	DeleteGenre(id int) error
+
+	GetBookById(bookId int) (models.ReturnBook, error)
+
+	GetAllCopies(page, limit string) ([]models.CopiesInfo, error)
+	GetCopieByBookIdAndId(bookId, copId string) (models.CopiesSolo, error)
 	//ChekRegisterUser(email string) (models.User, error)
 }
 
@@ -39,8 +44,8 @@ type User interface {
 }
 
 type Order interface {
-	CreateOrder(input models.OrderInput) (models.Order, error)
-	GetAllOrder(page, limit string) ([]models.InfoOrdDept, error)
+	CreateOrder(input models.OrderInput) (models.ReturnOrder, error)
+	GetAllOrder(page, limit string) ([]models.ReturnOrder, error)
 }
 
 type Return interface {

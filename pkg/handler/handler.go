@@ -20,10 +20,11 @@ func (h *Handler) InitRouter() *mux.Router {
 	////Book
 	r.HandleFunc("/book/all", h.GetAllBooks).Methods("GET")
 	r.HandleFunc("/book", h.CreateBook).Methods("POST")
+	r.HandleFunc("/book", h.GetBookById).Methods("GET")
 	r.HandleFunc("/book/download", h.DownloadBookPhoto).Methods("GET")
 	r.HandleFunc("/book/change", h.ChangeBookPhoto).Methods("POST")
 
-	r.HandleFunc("/book/title", h.GetBookByTitle).Methods("GET")
+	r.HandleFunc("/book/", h.GetBookByTitle).Methods("GET")
 	r.HandleFunc("/book/word", h.GetByWord).Methods("GET")
 	r.HandleFunc("/book/image", h.BookPhoto).Methods("GET")
 	r.HandleFunc("/book/rating", h.GetByTopRating).Methods("GET")
@@ -53,6 +54,10 @@ func (h *Handler) InitRouter() *mux.Router {
 	//Return
 	r.HandleFunc("/return", h.ReturnBook).Methods("POST")
 	r.HandleFunc("/debors", h.GetAllDebors).Methods("GET")
+
+	// Copies
+	r.HandleFunc("/copies", h.GetAllCopies).Methods("GET")
+	r.HandleFunc("/copies/id", h.GetCopiesByIdAndBookID).Methods("GET")
 
 	return r
 }
